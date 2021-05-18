@@ -14,12 +14,7 @@ Table of Contents
 
 * [Prerequisites](#prerequisites)
 * [Plugins](#plugins)
-    * [GPU device plugin](#gpu-device-plugin)
     * [FPGA device plugin](#fpga-device-plugin)
-    * [QAT device plugin](#qat-device-plugin)
-    * [VPU device plugin](#vpu-device-plugin)
-    * [SGX device plugin](#sgx-device-plugin)
-    * [DSA device pugin](#dsa-device-plugin)
 * [Device Plugins Operator](#device-plugins-operator)
 * [Demos](#demos)
 * [Developers](#developers)
@@ -41,19 +36,6 @@ Prerequisites for building and running these device plugins include:
 ## Plugins
 
 The below sections detail existing plugins developed using the framework.
-
-### GPU device plugin
-
-The [GPU device plugin](cmd/gpu_plugin/README.md) supports Intel
-[GVT-d](https://github.com/intel/gvt-linux/wiki/GVTd_Setup_Guide) device passthrough
-and acceleration using GPUs of the following hardware families:
-
-- Integrated GPUs within Intel Core processors
-- Intel Xeon processors
-- Intel Visual Compute Accelerator (Intel VCA)
-
-The demo subdirectory contains both a [GPU plugin demo video](demo/readme.md#intel-gpu-device-plugin-demo-video)
-as well as code for an OpenCL [FFT demo](demo/ubuntu-demo-opencl).
 
 ### FPGA device plugin
 
@@ -92,96 +74,6 @@ programming.  It also implements access control by namespacing FPGA configuratio
 The [FPGA prestart CRI-O hook](cmd/fpga_crihook/README.md) performs discovery of the requested FPGA
 function bitstream and programs FPGA devices based on the environment variables in the workload
 description.
-
-### [QAT](https://01.org/intel-quick-assist-technology) device plugin
-
-The [QAT plugin](cmd/qat_plugin/README.md) supports device plugin for Intel QAT adapters, and includes
-code [showing deployment](cmd/qat_plugin/dpdkdrv) via [DPDK](https://doc.dpdk.org/guides/cryptodevs/qat.html).
-
-The demo subdirectory includes details of both a
-[QAT DPDK demo](demo/readme.md#intel-quickassist-technology-device-plugin-with-dpdk-demo-video)
-and a [QAT OpenSSL demo](demo/readme.md#intel-quickassist-technology-device-plugin-openssl-demo-video).
-Source for the OpenSSL demo can be found in the [relevant subdirectory](demo/openssl-qat-engine).
-
-Details for integrating the QAT device plugin into [Kata Containers](https://katacontainers.io/)
-can be found in the
-[Kata Containers documentation repository](https://github.com/kata-containers/documentation/blob/master/use-cases/using-Intel-QAT-and-kata.md).
-
-### VPU device plugin
-
-The [VPU device plugin](cmd/vpu_plugin/README.md) supports Intel VCAC-A card
-(https://www.intel.com/content/dam/www/public/us/en/documents/datasheets/media-analytics-vcac-a-accelerator-card-by-celestica-datasheet.pdf)
-the card has:
-- 1 Intel Core i3-7100U processor
-- 12 MyriadX VPUs
-- 8GB DDR4 memory
-
-The demo subdirectory includes details of a OpenVINO deployment and use of the VPU plugin.
-Sources can be found in [openvino-demo](demo/ubuntu-demo-openvino)
-
-### SGX device plugin
-
-The [SGX device plugin](cmd/sgx_plugin/README.md) allows workloads to use Intel SGX on
-platforms with SGX Flexible Launch Control enabled, e.g.,:
-
-- 3rd Generation Intel® Xeon® Scalable Platform, code-named “Ice Lake”
-- Intel® Xeon® E3
-- Intel® NUC Kit NUC7CJYH
-
-The SGX plugin comes in three parts.
-
-- the [device plugin](#sgx-plugin)
-- the [admission webhook](#sgx-admission-webhook)
-- the [SGX EPC memory registration](#sgx-epc-memory-registration)
-
-The demo subdirectory contains a [video](demo/readme.md#intel-sgx-device-plugin-demo-video) showing the deployment
-and use of the SGX device plugin. Sources relating to the demo can be found in the
-[sgx-sdk-demo](demo/sgx-sdk-demo) and [sgx-aesmd-demo](demo/sgx-aesmd-demo) subdirectories.
-
-Brief overviews of the SGX sub-components are given below.
-
-<a name="sgx-plugin"></a>
-#### device plugin
-
-The [SGX device plugin](cmd/sgx_plugin/README.md) is responsible for discovering and reporting SGX
-device nodes to `kubelet`.
-
-Containers requesting SGX resources in the cluster should not use the device plugins resources directly.
-
-#### SGX Admission webhook
-
-The SGX admission webhook is responsible for performing Pod mutations based on the `sgx.intel.com/quote-provider`
-pod annotation set by the user. The purpose of the webhook is to hide the details of setting the necessary
-device resources and volume mounts for using SGX remote attestation in the cluster. Furthermore,
-the SGX admission webhook is responsible for writing a pod/sandbox `sgx.intel.com/epc` annotation that is used by
-Kata Containers to dynamically adjust its virtualized SGX encrypted page cache (EPC) bank(s) size.
-
-The SGX admission webhook is available as part of [Intel Device Plugin Operator](cmd/operator/README.md) or
-as a standalone [SGX Admission webhook image](cmd/sgx_admissionwebhook/README.md).
-
-#### SGX EPC memory registration
-
-The SGX EPC memory available on each node is registered as a Kubernetes extended resource using
-node-feature-discovery (NFD). A custom NFD source hook is installed as part of [SGX device plugin](cmd/sgx_plugin/README.md)
-operator deployment and NFD is configured to register the SGX EPC memory extended resource reported by the hook.
-
-Containers requesting SGX EPC resources in the cluster use `sgx.intel.com/epc` resource which is of
-type [memory](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory).
-
-### DSA device plugin
-
-The [DSA device plugin](cmd/dsa_plugin/README.md) supports acceleration using the Intel Data Streaming accelerator(DSA).
-
-## Device Plugins Operator
-
-To simplify the deployment of the device plugins, a unified device plugins operator is implemented.
-
-Currently the operator has support for the QAT, GPU, FPGA, SGX and DSA device plugins. Each
-device plugin has its own custom resource definition (CRD) and the corresponding controller that
-watches CRUD operations to those custom resources.
-
-The [Device plugins operator README](cmd/operator/README.md) gives the installation and usage
-details. The operator is also available via [operatorhub.io](https://operatorhub.io/operator/intel-device-plugins-operator).
 
 ## Demos
 
