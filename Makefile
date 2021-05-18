@@ -57,7 +57,7 @@ else
 endif
 
 test-with-kind:
-	@build/docker/build-image.sh intel/intel-fpga-admissionwebhook buildah
+	@build/docker/build-image.sh intel/intel-fpga-admissionwebhook docker
 	@$(PODMAN) tag localhost/intel/intel-fpga-admissionwebhook:devel docker.io/intel/intel-fpga-admissionwebhook:devel
 	@mkdir -p $(e2e_tmp_dir)
 	@$(PODMAN) save "docker.io/intel/intel-fpga-admissionwebhook:devel" -o $(e2e_tmp_dir)/$(WEBHOOK_IMAGE_FILE)

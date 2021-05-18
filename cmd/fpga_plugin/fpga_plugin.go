@@ -15,7 +15,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -34,7 +33,6 @@ import (
 const (
 	devfsDirectory     = "/dev"
 	sysfsDirectoryOPAE = "/sys/class/fpga"
-	sysfsDirectoryDFL  = "/sys/class/fpga_region"
 
 	// Device plugin settings.
 	namespace      = "fpga.intel.com"
@@ -176,27 +174,18 @@ type devicePlugin struct {
 	newPort    newPortFunc
 
 	annotationValue string
-
 	scanTicker *time.Ticker
 	scanDone   chan bool
 }
 
 // newDevicePlugin returns new instance of devicePlugin.
-func newDevicePlugin(mode string, rootPath string) (*devicePlugin, error) {
+func newDevicePlugin(rootPath string) (*devicePlugin, error) {
 	var dp *devicePlugin
 	var err error
 
 	sysfsPathOPAE := path.Join(rootPath, sysfsDirectoryOPAE)
 	devfsPath := path.Join(rootPath, devfsDirectory)
-	if _, err = os.Stat(sysfsPathOPAE); os.IsNotExist(err) {
-		sysfsPathDFL := path.Join(rootPath, sysfsDirectoryDFL)
-		if _, err = os.Stat(sysfsPathDFL); os.IsNotExist(err) {
-			return nil, fmt.Errorf("kernel driver is not loaded: neither %s nor %s sysfs entry exists", sysfsPathOPAE, sysfsPathDFL)
-		}
-		dp, err = newDevicePluginDFL(sysfsPathDFL, devfsPath, mode)
-	} else {
-		dp, err = newDevicePluginOPAE(sysfsPathOPAE, devfsPath, mode)
-	}
+	dp, err = newDevicePluginOPAE(sysfsPathOPAE, devfsPath)
 
 	if err != nil {
 		return nil, err
@@ -305,60 +294,14 @@ func (dp *devicePlugin) scanFPGAs() (dpapi.DeviceTree, error) {
 	return dp.getDevTree(devices), nil
 }
 
-// getPluginParams is a helper function to avoid code duplication.
-// It's used in newDevicePluginOPAE and newDevicePluginDFL.
-func getPluginParams(mode string) (getDevTreeFunc, string, error) {
-	var getDevTree getDevTreeFunc
-
-	annotationValue := ""
-
-	switch mode {
-	case afMode:
-		getDevTree = getAfuTree
-	case regionMode:
-		getDevTree = getRegionTree
-		annotationValue = fmt.Sprintf("%s/%s", namespace, regionMode)
-	case regionDevelMode:
-		getDevTree = getRegionDevelTree
-	default:
-		return nil, annotationValue, errors.Errorf("Wrong mode: '%s'", mode)
-	}
-
-	return getDevTree, annotationValue, nil
-}
 
 func main() {
-	var mode string
-	var kubeconfig string
-	var master string
-	var nodename string
-
-	flag.StringVar(&kubeconfig, "kubeconfig", "", "absolute path to the kubeconfig file")
-	flag.StringVar(&master, "master", "", "master url")
-	flag.StringVar(&nodename, "node-name", os.Getenv("NODE_NAME"), "node name in the cluster to query mode annotation from")
-	flag.StringVar(&mode, "mode", string(afMode),
-		fmt.Sprintf("device plugin mode: '%s' (default), '%s' or '%s'", afMode, regionMode, regionDevelMode))
-	flag.Parse()
-
-	nodeMode, err := getModeOverrideFromCluster(nodename, kubeconfig, master, mode)
-	if err != nil {
-		klog.Warningf("could not get mode override from cluster: %+v", err)
-	}
-
-	var modeMessage string
-	if mode != nodeMode {
-		modeMessage = fmt.Sprintf(" (override from %s node annotation)", nodename)
-		mode = nodeMode
-	} else {
-		modeMessage = ""
-	}
-
-	plugin, err := newDevicePlugin(mode, "")
+	plugin, err := newDevicePlugin("")
 	if err != nil {
 		klog.Fatalf("%+v", err)
 	}
 
-	klog.V(1).Infof("FPGA device plugin (%s) started in %s mode%s", plugin.name, mode, modeMessage)
+	klog.V(1).Infof("FPGA device plugin (%s) started", plugin.name)
 	manager := dpapi.NewManager(namespace, plugin)
 	manager.Run()
 }

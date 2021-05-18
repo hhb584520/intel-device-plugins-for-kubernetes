@@ -24,12 +24,7 @@ const (
 )
 
 // newDevicePlugin returns new instance of devicePlugin.
-func newDevicePluginOPAE(sysfsDir string, devfsDir string, mode string) (*devicePlugin, error) {
-	getDevTree, annotationValue, err := getPluginParams(mode)
-	if err != nil {
-		return nil, err
-	}
-
+func newDevicePluginOPAE(sysfsDir string, devfsDir string) (*devicePlugin, error) {
 	return &devicePlugin{
 		name: "OPAE",
 
@@ -39,8 +34,8 @@ func newDevicePluginOPAE(sysfsDir string, devfsDir string, mode string) (*device
 		deviceReg: regexp.MustCompile(opaeDeviceRE),
 		portReg:   regexp.MustCompile(opaePortRE),
 
-		getDevTree: getDevTree,
+		getDevTree: getAfuTree,
 
-		annotationValue: annotationValue,
+		annotationValue: "",
 	}, nil
 }
