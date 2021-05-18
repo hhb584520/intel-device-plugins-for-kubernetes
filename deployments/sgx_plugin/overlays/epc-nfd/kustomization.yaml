@@ -1,5 +1,0 @@
-bases:
-  - ../../base
-  - ../../../sgx_nfd
-patches:
-  - add-epc-nfd-initcontainer.yaml

@@ -1,4 +1,0 @@
-bases:
-  - ../../base
-patches:
-  - add-nodeselector-intel-gpu.yaml

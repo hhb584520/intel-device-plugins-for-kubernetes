@@ -1,8 +1,0 @@
-apiVersion: deviceplugin.intel.com/v1
-kind: DsaDevicePlugin
-metadata:
-  name: dsadeviceplugin-sample
-spec:
-  image: intel/intel-dsa-plugin:0.20.0
-  sharedDevNum: 10
-  logLevel: 4
