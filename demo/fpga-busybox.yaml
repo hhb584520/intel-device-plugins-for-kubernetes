@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fpga-busybox
+spec:
+  containers:
+  - name: fpga-busybox
+    image: docker.io/busybox:latest
+    imagePullPolicy: IfNotPresent
+    command: 
+      - sleep
+      - "3600"
+    securityContext:
+      capabilities:
+        add:
+          [IPC_LOCK]
+    resources:
+      limits:
+        fpga.intel.com/af-934.63b.k0YRbaUtXKiwaqmjie98jWOzd5uL3U8DnOsDARgdau8: 1
+        cpu: 1
+
+  restartPolicy: Never
