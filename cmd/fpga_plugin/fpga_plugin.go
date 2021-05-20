@@ -86,32 +86,6 @@ func getRegionDevelTree(devices []device) dpapi.DeviceTree {
 	return regionTree
 }
 
-// getRegionTree returns mapping of region interface IDs to AF ports only.
-func getRegionTree(devices []device) dpapi.DeviceTree {
-	regionTree := dpapi.NewDeviceTree()
-
-	for _, dev := range devices {
-		for _, region := range dev.regions {
-			health := pluginapi.Healthy
-			if region.interfaceID == unhealthyInterfaceID {
-				health = pluginapi.Unhealthy
-			}
-			devType := fmt.Sprintf("%s-%s", regionMode, region.interfaceID)
-			devNodes := make([]pluginapi.DeviceSpec, len(region.afus))
-			for num, afu := range region.afus {
-				devNodes[num] = pluginapi.DeviceSpec{
-					HostPath:      afu.devNode,
-					ContainerPath: afu.devNode,
-					Permissions:   "rw",
-				}
-			}
-			regionTree.AddDevice(devType, region.id, dpapi.NewDeviceInfo(health, devNodes, nil, nil))
-		}
-	}
-
-	return regionTree
-}
-
 // getAfuTree returns mapping of AFU IDs to AF ports.
 func getAfuTree(devices []device) dpapi.DeviceTree {
 	afuTree := dpapi.NewDeviceTree()

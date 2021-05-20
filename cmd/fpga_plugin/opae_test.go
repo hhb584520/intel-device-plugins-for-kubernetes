@@ -166,41 +166,6 @@ func TestGetRegionDevelTreeOPAE(t *testing.T) {
 	}
 }
 
-func TestGetRegionTreeOPAE(t *testing.T) {
-	expected := dpapi.NewDeviceTree()
-	nodes := []pluginapi.DeviceSpec{
-		{
-			HostPath:      "/dev/intel-fpga-port.0",
-			ContainerPath: "/dev/intel-fpga-port.0",
-			Permissions:   "rw",
-		},
-	}
-	expected.AddDevice(regionMode+"-ce48969398f05f33946d560708be108a", "intel-fpga-fme.0", dpapi.NewDeviceInfo(pluginapi.Healthy, nodes, nil, nil))
-
-	nodes = []pluginapi.DeviceSpec{
-		{
-			HostPath:      "/dev/intel-fpga-port.1",
-			ContainerPath: "/dev/intel-fpga-port.1",
-			Permissions:   "rw",
-		},
-	}
-	expected.AddDevice(regionMode+"-ce48969398f05f33946d560708be108a", "intel-fpga-fme.1", dpapi.NewDeviceInfo(pluginapi.Healthy, nodes, nil, nil))
-
-	nodes = []pluginapi.DeviceSpec{
-		{
-			HostPath:      "/dev/intel-fpga-port.2",
-			ContainerPath: "/dev/intel-fpga-port.2",
-			Permissions:   "rw",
-		},
-	}
-	expected.AddDevice(regionMode+"-"+unhealthyInterfaceID, "intel-fpga-fme.2", dpapi.NewDeviceInfo(pluginapi.Unhealthy, nodes, nil, nil))
-
-	result := getRegionTree(getDevicesOPAE())
-	if !reflect.DeepEqual(result, expected) {
-		t.Error("Got unexpected result: ", result)
-	}
-}
-
 func TestGetAfuTreeOPAE(t *testing.T) {
 	expected := dpapi.NewDeviceTree()
 	nodes := []pluginapi.DeviceSpec{

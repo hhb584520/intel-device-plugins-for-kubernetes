@@ -1,6 +1,0 @@
-namespace: intelfpgaplugin-system
-namePrefix: intelfpgaplugin-
-
-bases:
-  - ../../base
-  - ../../../fpga_admissionwebhook/base

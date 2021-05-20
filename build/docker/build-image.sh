@@ -1,4 +1,5 @@
 #!/bin/sh -e
+set -ex
 
 IMG=$1
 
